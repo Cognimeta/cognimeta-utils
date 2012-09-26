@@ -119,14 +119,16 @@ wordLenB = uncheckedBijection (Len . getLen) (Len . getLen)
 
 refineLen :: forall u v n. (Bits n, LgMultiple u v) => Len u n -> Len v n
 refineLen (Len u) = Len $ u `shiftL` getLgMul (lgMul :: LgMul u v)
-coarsenLen :: forall u v n. (Bits n, LgMultiple v u) => Len u n -> Len v n
+coarsenLen :: forall u v n. (Bits n, Num n, LgMultiple v u) => Len u n -> Len v n
 coarsenLen (Len u) = Len $ ceilDivPower2 (getLgMul (lgMul :: LgMul v u)) u
 
 {-# INLINE coarseRem #-}
-coarseRem ::  forall u v n. (Bits n, LgMultiple v u) => Len u n -> (Len v n, Len u n)
+coarseRem ::  forall u v n. (Bits n, Num n, LgMultiple v u) => Len u n -> (Len v n, Len u n)
 coarseRem (Len u) = let s = getLgMul (lgMul :: LgMul v u) in (Len $ u `shiftR` s, Len $ u .&. ((1 `shiftL` s) - 1))
 
+ceilDivPower2 :: (Num a, Bits a) => Int -> a -> a
 ceilDivPower2 n x = (x + ((1 `shiftL` n) - 1)) `shiftR` n
+roundUpPower2 :: (Num a, Bits a) => Int -> a -> a
 roundUpPower2 n x = ceilDivPower2 n x `shiftL` n
 
 instance Super a b => Super (Len u a) (Len u b) where super = injectionM' (inv struct) . super . injectionM' struct

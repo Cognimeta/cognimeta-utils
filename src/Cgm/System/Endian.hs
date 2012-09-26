@@ -42,7 +42,7 @@ import Cgm.Data.Structured
 import Cgm.Control.InFunctor
 import Cgm.Control.Combinators
 
-class (Prim w, Bits w) => Endian w where 
+class (Prim w, Bits w, Num w) => Endian w where 
   untypedSwapBytes :: w -> w
 
 instance Endian Word8 where 
@@ -64,16 +64,17 @@ instance Endian Word where
 
 {-# INLINE swapHalves #-} 
 swapHalves :: forall w. Bits w => w -> w
-swapHalves w = w `shiftR` halfBitSize + w `shiftL` halfBitSize where
+swapHalves w = w `shiftR` halfBitSize .|. w `shiftL` halfBitSize where
   halfBitSize = bitSize (undefined :: w) `div` 2
 
+-- | Exchange bits in mask with bits at some specified relative position (the last bits must not be in the mask)
 {-# INLINE swapMask #-} 
 swapMask :: Bits w => w -> Int -> w -> w
-swapMask mask shift w = ((w `shiftR` shift) .&. mask) + ((w .&. mask) `shiftL` shift)
+swapMask mask shift w = ((w `shiftR` shift) .&. mask) .|. ((w .&. mask) `shiftL` shift)
 
--- Number with byte value n in the nth byte, in order of increasing significance (starting at 0)
+-- | Number with byte value n in the nth byte, in order of increasing significance (starting at 0)
 byteNumbers :: forall w. Endian w => w
-byteNumbers = sum $ fmap (\n -> fromIntegral n `shiftL` (8 * fromIntegral n)) $ (at :: At w) increasingBytes
+byteNumbers = foldr (.|.) 0 $ fmap (\n -> fromIntegral n `shiftL` (8 * fromIntegral n)) $ (at :: At w) increasingBytes
 
 increasingBytes :: forall w. Prim w => Tagged w [Word8]
 increasingBytes = Tagged $ range (0, fromIntegral (primSizeOf (undefined :: w)) - 1)
