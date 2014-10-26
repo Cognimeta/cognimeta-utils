@@ -1,5 +1,5 @@
 {-
-Copyright 2010-2012 Cognimeta Inc.
+Copyright 2010-2013 Cognimeta Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
 compliance with the License. You may obtain a copy of the License at
@@ -15,8 +15,6 @@ or implied. See the License for the specific language governing permissions and 
 
 module Cgm.Data.Word (
   WordConv(..),
-  onWordConv,
-  onWordConvB,
   wordBits,
   partialShiftL,
   partialShiftRL,
@@ -28,7 +26,8 @@ module Cgm.Data.Word (
   unsigned,
   WordConv1(..),
   splitWord64LE,
-  module Data.Word
+  module Data.Word,
+  module Cgm.Data.WordInstance
   ) where
 
 import Prelude()
@@ -43,31 +42,12 @@ import Cgm.Control.InFunctor
 import Cgm.Data.Tagged
 import Cgm.Data.WordN
 import Cgm.Control.Combinators
+import Cgm.Data.WordConv
+import Cgm.Data.WordInstance
 
 {-# INLINE wordBits #-}
 wordBits :: Integral a => a
 wordBits = fromIntegral $ bitSize (undefined :: Word)
-
-
-class WordConv a where
-  wordConv  :: Bijection' Word a
-
-onWordConvB :: (Bijection' Word Word32 -> z) -> (Bijection' Word Word64 -> z) -> z
-onWordConvB a b = onWordConv (a wordConv) (b wordConv)
-
-onWordConv :: (WordConv Word32 => z) -> (WordConv Word64 => z) -> z
-
-#if WORDSIZE == 32
-instance WordConv Word32 where
-  wordConv = uncheckedBijection fromIntegral fromIntegral
-onWordConv a _ = a
-#endif
-
-#if WORDSIZE == 64
-instance WordConv Word64 where
-  wordConv = uncheckedBijection fromIntegral fromIntegral
-onWordConv _ a = a
-#endif
 
 -- | 0 <= n < wordBits
 {-# INLINE partialShiftL #-}
