@@ -11,7 +11,7 @@ distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, e
 or implied. See the License for the specific language governing permissions and limitations under the License.
 -}
 
-{-# LANGUAGE TemplateHaskell, TypeFamilies, GeneralizedNewtypeDeriving, ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell, TypeFamilies, GeneralizedNewtypeDeriving, ScopedTypeVariables, MagicHash, UnboxedTuples #-}
 
 module Cgm.System.Endian (
   Endian(..),
@@ -109,10 +109,25 @@ platformWordEndianness = (at :: At Word) platformEndianness
 reverseEndianness LittleEndian = BigEndian
 reverseEndianness BigEndian = LittleEndian
 
-newtype ByteSwapped w = ByteSwapped w deriving (Prim, Show)
+newtype ByteSwapped w = ByteSwapped w deriving (Show)
 swapBytes :: Endian w => w -> ByteSwapped w
 swapBytes = ByteSwapped . untypedSwapBytes
 unswapBytes :: Endian w => ByteSwapped w -> w
 unswapBytes (ByteSwapped w) = untypedSwapBytes w
+
+-- Deriving Prim fails due to unpacked tuple in readByteArray# so...
+instance Prim a => Prim (ByteSwapped a) where
+  sizeOf# (ByteSwapped a) = sizeOf# a
+  alignment# (ByteSwapped a) = alignment# a
+  indexByteArray# arr# i# = ByteSwapped (indexByteArray# arr# i#)
+  readByteArray# arr# i# s# = case readByteArray# arr# i# s# of
+    (# s1#, x# #) -> (# s1#, ByteSwapped x# #)
+  writeByteArray# arr# i# (ByteSwapped a) s# = writeByteArray# arr# i# a s#
+  setByteArray# arr# i# j# (ByteSwapped a) s# = setByteArray# arr# i# j# a s#
+  indexOffAddr# arr# i# = ByteSwapped (indexOffAddr# arr# i#)
+  readOffAddr# arr# i# s# = case readOffAddr# arr# i# s# of
+    (# s1#, x# #) -> (# s1#, ByteSwapped x# #)
+  writeOffAddr# arr# i# (ByteSwapped a) s# = writeOffAddr# arr# i# a s#
+  setOffAddr# arr# i# j# (ByteSwapped a) s# = setOffAddr# arr# i# j# a s#
 
 deriveStructured ''Endianness

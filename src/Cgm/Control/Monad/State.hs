@@ -11,7 +11,7 @@ distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, e
 or implied. See the License for the specific language governing permissions and limitations under the License.
 -}
 
-{-# LANGUAGE TupleSections, FlexibleInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE TupleSections, FlexibleInstances, MultiParamTypeClasses, Rank2Types, ScopedTypeVariables #-}
 
 module Cgm.Control.Monad.State(
   StateT(..),
@@ -43,7 +43,7 @@ import Control.Monad.IO.Class
 import Control.Concurrent.MVar
 import qualified Control.Monad.State.Strict as Std
 
-import Data.Lens hiding (focus)
+import Control.Lens hiding (focus)
 import Control.Comonad.Trans.Store
 
 -- | runStateT and runState do not have the usual types: for now we do not make it too easy to discard the precious 'Nothing'
@@ -77,8 +77,13 @@ instance Monad m => MonadState s (StateT s m) where
   get = StateT $ return . (, Nothing)
   put = StateT . const . return . ((), ) . Just
 
-focus :: Monad m => Lens t s -> StateT s m a -> StateT t m a
-focus l (StateT smas) = StateT $ (\(st, s) -> liftM (second $ fmap st) $ smas s) . runStore . runLens l
+focus :: forall m t s a. Monad m => Lens' t s -> StateT s m a -> StateT t m a
+focus l (StateT smas) = StateT $ stateTOut . l2 (\s -> StateTOut (smas s)) where
+  l2 :: (s -> StateTOut m a s) -> (t -> StateTOut m a t) = l
+
+newtype StateTOut m a s = StateTOut {stateTOut :: m (a, Maybe s)}
+instance Monad m => Functor (StateTOut m a) where
+  fmap f (StateTOut msa) = StateTOut $ liftM (second $ fmap f) msa
 
 -- | functions st and ts should form a bijection since a StateT t with no changes will become a StateT s with no changes, no matter what st and ts are
 viewState :: Monad m => (s -> t, t -> s) -> StateT t m a -> StateT s m a
