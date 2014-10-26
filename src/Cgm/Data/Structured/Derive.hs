@@ -16,12 +16,13 @@ module Cgm.Data.Structured.Derive (
     deriveStructured
 ) where
 
-import Language.Haskell.TH
-import Control.Monad
+import           Control.Monad
+import          Control.Applicative
+import           Language.Haskell.TH
 
 -- TODO: Deriving an instance is problematic since it must be exported. And most often this is
 -- undesirable because it breaks the type abstraction. Instead we should derive
--- a method which provides the bijection, and modules which perform the derivation 
+-- a method which provides the bijection, and modules which perform the derivation
 -- would then be free to define an instance and/or use the bijection. We may want to
 -- derive a structure type also.
 
@@ -77,8 +78,8 @@ deriveStructured typName =
   do (TyConI d) <- reify typName
      (type_name,tvars,_,constructors) <- typeInfo (return d)
      appliedType <- appsT $ conT' type_name : map (varT . fromTyVar) tvars
-     let structureType = tySynInstD (mkName "Structure") [return appliedType] $
-                                     nestedEitherT $ map (nestedTupT . map (return . snd) . snd) constructors
+     let structureType = tySynInstD (mkName "Structure") $ TySynEqn [appliedType] <$>
+                                     (nestedEitherT $ map (nestedTupT . map (return . snd) . snd) constructors)
          structureFun = do clauses <- mapM structureClause constructors
                            return $ FunD (mkName "structure") $ addETags clauses
          structureClause (conName, components) =

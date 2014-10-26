@@ -150,7 +150,7 @@ primSizeOf w = I# (sizeOf# w)
 -- | f is either Free or Pinned
 data STPrimArray s f w = STPrimArray (MutableByteArray# s)
 
-instance Eq (STPrimArray s f w) where (STPrimArray a) == (STPrimArray b) = sameMutableByteArray# a b
+instance Eq (STPrimArray s f w) where (STPrimArray a) == (STPrimArray b) = isTrue# (sameMutableByteArray# a b)
 
 instance Prim w => Array (STPrimArray s f w) where
   type ArrayElem (STPrimArray s f w) = w
