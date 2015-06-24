@@ -11,14 +11,13 @@ distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, e
 or implied. See the License for the specific language governing permissions and limitations under the License.
 -}
 
-{-# LANGUAGE TupleSections, FlexibleInstances, MultiParamTypeClasses, Rank2Types, ScopedTypeVariables #-}
+{-# LANGUAGE TupleSections, FlexibleInstances, MultiParamTypeClasses, Rank2Types, ScopedTypeVariables, TypeFamilies #-}
 
 module Cgm.Control.Monad.State(
   StateT(..),
   State,
   mState,
   runState,
-  focus,
   viewState,
   partialState,
   partialStateE,
@@ -44,7 +43,10 @@ import Control.Concurrent.MVar
 import qualified Control.Monad.State.Strict as Std
 
 import Control.Lens hiding (focus)
+import Control.Lens.Zoom
+import Control.Lens.Internal.Zoom
 import Control.Comonad.Trans.Store
+import Data.Profunctor.Unsafe
 
 -- | runStateT and runState do not have the usual types: for now we do not make it too easy to discard the precious 'Nothing'
 newtype StateT s m a = StateT {runStateT :: s -> m (a, Maybe s)}
@@ -77,9 +79,10 @@ instance Monad m => MonadState s (StateT s m) where
   get = StateT $ return . (, Nothing)
   put = StateT . const . return . ((), ) . Just
 
-focus :: forall m t s a. Monad m => Lens' t s -> StateT s m a -> StateT t m a
-focus l (StateT smas) = StateT $ stateTOut . l2 (\s -> StateTOut (smas s)) where
-  l2 :: (s -> StateTOut m a s) -> (t -> StateTOut m a t) = l
+type instance Zoomed (StateT s z) = StateTOut z
+
+instance Monad m => Zoom (StateT s m) (StateT t m) s t where
+  zoom l (StateT tmat) = StateT $ stateTOut . l (\t -> StateTOut (tmat t)) where
 
 newtype StateTOut m a s = StateTOut {stateTOut :: m (a, Maybe s)}
 instance Monad m => Functor (StateTOut m a) where

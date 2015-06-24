@@ -39,6 +39,7 @@ library
     Cgm.Control.InFunctor
     Cgm.Control.Monad.State
     Cgm.Control.Profile
+    Cgm.Debug.Trace
     Cgm.Data.Array
     Cgm.Data.Bool
     Cgm.Data.Either
@@ -87,7 +88,8 @@ library
     tagged >= 0.4.2.1,
     lens >= 4.4.0.2,
     deepseq >= 1.3.0.0,
-    comonad >=4.2.2 && <4.3
+    comonad >=4.2.2 && <4.3,
+    profunctors
   ghc-options: -rtsopts -fcontext-stack=80 -O2 -funfolding-use-threshold=24
   extensions: 
 
