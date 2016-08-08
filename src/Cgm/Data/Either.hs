@@ -15,26 +15,22 @@ or implied. See the License for the specific language governing permissions and 
 
 module Cgm.Data.Either ( 
   (:|),
-  isRight,
   mkRight,
   mkLeft,
   boolEither,
   fromRight,
-  throwErrorT,
+  throwExceptT,
   mapError
   ) where
 
+import Data.Bool
 import Cgm.Control.InFunctor
-import Cgm.Data.Bool
-import Control.Monad.Error
+import Control.Monad.Except
 import Control.Exception
 import Control.Arrow
 
 infixr 2 :|
 type a :| b = Either a b
-
-isRight :: Either a b -> Bool
-isRight = either (const False) (const True)
 
 mkRight :: a :>> Either b a
 mkRight = uncheckedStrictlyIncreasing Right
@@ -48,11 +44,11 @@ fromRight :: Either a b -> b
 fromRight (Left _)  = error "fromRight called on Left"
 fromRight (Right x) = x
 
-throwErrorT :: (Show e, MonadIO m) => ErrorT e m a -> m a
-throwErrorT = (>>= liftIO . evaluate . either (error . show) id) . runErrorT
+throwExceptT :: (Show e, MonadIO m) => ExceptT e m a -> m a
+throwExceptT = (>>= liftIO . evaluate . either (error . show) id) . runExceptT
 
-mapError :: Monad m => (e -> e') -> ErrorT e m a -> ErrorT e' m a
-mapError e = mapErrorT $ liftM $ left e
+mapError :: Monad m => (e -> e') -> ExceptT e m a -> ExceptT e' m a
+mapError e = mapExceptT $ liftM $ left e
 
 
 --filterEither :: (a -> Either b c) -> DList a -> (DList b, DList c)

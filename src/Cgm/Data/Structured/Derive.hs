@@ -146,14 +146,14 @@ typeInfo m =
            _ -> error ("derive: not a data type declaration: " ++ show d)
 
      where
-        consA (DataD _ _ _ cs _)    = map conA cs
-        consA (NewtypeD _ _ _ c _)  = [ conA c ]
+        consA (DataD _ _ _ _ cs _)    = map conA cs
+        consA (NewtypeD _ _ _ _ c _)  = [ conA c ]
 
-        paramsA (DataD _ _ ps _ _) = ps
-        paramsA (NewtypeD _ _ ps _ _) = ps
+        paramsA (DataD _ _ ps _ _ _) = ps
+        paramsA (NewtypeD _ _ ps _ _ _) = ps
 
-        termsA (DataD _ _ _ cs _) = map termA cs
-        termsA (NewtypeD _ _ _ c _) = [ termA c ]
+        termsA (DataD _ _ _ _ cs _) = map termA cs
+        termsA (NewtypeD _ _ _ _ c _) = [ termA c ]
 
         termA (NormalC c xs)        = (c, map (\x -> (Nothing, snd x)) xs)
         termA (RecC c xs)           = (c, map (\(n, _, t) -> (Just $ simpleName n, t)) xs)
@@ -163,8 +163,8 @@ typeInfo m =
         conA (RecC c xs)            = (simpleName c, length xs)
         conA (InfixC _ c _)         = (simpleName c, 2)
 
-        name (DataD _ n _ _ _)      = n
-        name (NewtypeD _ n _ _ _)   = n
+        name (DataD _ n _ _ _ _)      = n
+        name (NewtypeD _ n _ _ _ _)   = n
         name d                      = error $ show d
 
 simpleName :: Name -> Name

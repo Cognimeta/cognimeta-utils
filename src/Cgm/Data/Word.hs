@@ -47,7 +47,7 @@ import Cgm.Data.WordInstance
 
 {-# INLINE wordBits #-}
 wordBits :: Integral a => a
-wordBits = fromIntegral $ bitSize (undefined :: Word)
+wordBits = fromIntegral $ finiteBitSize (undefined :: Word)
 
 -- | 0 <= n < wordBits
 {-# INLINE partialShiftL #-}

@@ -47,9 +47,9 @@ module Cgm.Data.WordN (
 import Data.Word
 import Data.Int
 import Data.Bits
+import Data.Bool
 import Control.Applicative
 import GHC.Enum
-import Cgm.Data.Bool
 import Cgm.Data.Super
 import Cgm.Data.Nat
 import Cgm.Control.Combinators
@@ -168,7 +168,14 @@ instance RWordC w n => Bits (RWord w n) where
     rotateL x i = shiftL x i .|. shiftR x ((at :: At n) intOfNat - i)
     rotateR x i = rotateL x ((at :: At n) intOfNat - i)
     bitSize _ = (at :: At n) intOfNat
+    bitSizeMaybe _ = Just $ (at :: At n) intOfNat
     isSigned _ = False
+    popCount = popCount . unRWord
+    bit = rClean . RWord . bit
+    testBit w = testBit (unRWord w)
+
+instance RWordC w n => FiniteBits (RWord w n) where
+    finiteBitSize _ = (at :: At n) intOfNat  
 
 instance RWordC w n => Ord (RWord w n) where
     compare = liftRRToA compare

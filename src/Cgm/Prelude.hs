@@ -29,8 +29,7 @@ module Cgm.Prelude (
 
   module Cgm.Control.Combinators,
   module Cgm.Control.InFunctor,
-  module Cgm.Data.Tagged,
-  module Cgm.Data.Bool
+  module Cgm.Data.Tagged
   ) where
 
 --import Prelude ()
@@ -63,7 +62,6 @@ import Control.Category
 import Cgm.Control.Combinators
 import Cgm.Control.InFunctor
 import Cgm.Data.Tagged
-import Cgm.Data.Bool
 
 {-# INLINE counting #-}
 counting :: (Num a, Enum a) => a -> [a]

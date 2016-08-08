@@ -4,6 +4,7 @@ dist/
 #*#
 *.hi
 *.o
-
+.stack-work
+stack.yaml
 
 /.dist-buildwrapper/

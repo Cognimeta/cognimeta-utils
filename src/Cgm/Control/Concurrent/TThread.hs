@@ -21,13 +21,13 @@ module Cgm.Control.Concurrent.TThread (
 import Prelude hiding (catch)
 import Data.IntMap
 import Data.Typeable
+import Data.Bool
 import Control.Exception
 import Control.Monad
 import Control.Applicative
 import Control.Concurrent
 import Control.Concurrent.STM
 import Cgm.Control.Combinators
-import Cgm.Data.Bool
 
 data Task n a = Task n ((Task n a -> IO ()) -> IO (a -> a))
 data State n a = State {val :: a, nextId :: Int, threads :: IntMap (n, ThreadId, Bool), forcedCancel :: Bool}

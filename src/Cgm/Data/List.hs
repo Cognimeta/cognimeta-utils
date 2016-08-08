@@ -43,8 +43,7 @@ module Cgm.Data.List (
     unfoldrE
 ) where
 
---import Data.Foldable
-import Data.Collections.Foldable as Foldable
+import Data.Foldable
 import Data.Monoid
 import Cgm.Control.Combinators
 import Cgm.Control.InFunctor
@@ -89,8 +88,8 @@ class Sizable a where countDown :: Int -> a -> Maybe Int
 listStructure :: List a => Bijection' a (Maybe (Listed a, a))
 listStructure = uncheckedBijection (onList Nothing $ Just ./ (,)) (maybe emptyList $ uncurry consList)
 
-maybeMaximumBy :: Foldable l a => (a -> a -> Ordering) -> l -> Maybe a
-maybeMaximumBy o = Foldable.foldr (\a -> Just . maybe a (maxBy o a)) Nothing
+maybeMaximumBy :: Foldable l => (a -> a -> Ordering) -> l a -> Maybe a
+maybeMaximumBy o = foldr (\a -> Just . maybe a (maxBy o a)) Nothing
   
 maxBy :: (a -> a -> Ordering) -> a -> a -> a
 maxBy o a b = case o a b of {GT -> a; _ -> b}

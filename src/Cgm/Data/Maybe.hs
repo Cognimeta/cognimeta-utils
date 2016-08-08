@@ -36,8 +36,8 @@ module Cgm.Data.Maybe (
 
 import Data.Monoid
 import Data.Maybe
+import Data.Bool
 import Cgm.Control.Combinators
-import Cgm.Data.Bool
 
 ifJust :: Bool -> a -> Maybe a
 ifJust = bool (const Nothing) Just

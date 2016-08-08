@@ -63,9 +63,9 @@ instance Endian Word where
   
 
 {-# INLINE swapHalves #-} 
-swapHalves :: forall w. Bits w => w -> w
+swapHalves :: forall w. FiniteBits w => w -> w
 swapHalves w = w `shiftR` halfBitSize .|. w `shiftL` halfBitSize where
-  halfBitSize = bitSize (undefined :: w) `div` 2
+  halfBitSize = finiteBitSize (undefined :: w) `div` 2
 
 -- | Exchange bits in mask with bits at some specified relative position (the last bits must not be in the mask)
 {-# INLINE swapMask #-} 

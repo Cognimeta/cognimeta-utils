@@ -111,8 +111,8 @@ lgMulTrans = tag $ lgMul . (at :: At b) idAt . lgMul
 idAt :: Category c => Tagged a (c a a)
 idAt = tag id
 
-bitSizeLen :: forall a b. (Bits a, Integral b) => Tagged a (Len Bool b)
-bitSizeLen = tag $ Len $ fromIntegral $ bitSize (undefined :: a)
+bitSizeLen :: forall a b. (FiniteBits a, Integral b) => Tagged a (Len Bool b)
+bitSizeLen = tag $ Len $ fromIntegral $ finiteBitSize (undefined :: a)
 
 wordLenB :: WordConv a => Bijection' (Len Word b) (Len a b)
 wordLenB = uncheckedBijection (Len . getLen) (Len . getLen)
